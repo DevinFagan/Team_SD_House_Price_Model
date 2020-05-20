@@ -1,0 +1,65 @@
+---
+title: "House_price_EDA_doug"
+author: "Doug Devens"
+date: "5/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## read in file
+
+```{r}
+train_data = read.csv('train.csv', stringsAsFactors = FALSE)
+str(train_data)
+```
+```{r}
+summary(train_data)
+```
+
+See some parameters that clearly aren't what they're labeled.  
+convert MSSubClass to character/factor
+```{r}
+train_data$MSSubClass = as.character(train_data$MSSubClass)
+```
+
+## look for NAs
+Not much missing data except for: ~40% fireplaces, ~2.5% basements, 94% alleys, 80% fences, ~2% lot frontage, ~5% garages and 99.5% pools.
+```{r}
+colSums(is.na.data.frame(train_data))
+```
+Most houses in Ames wouldn't have pools, and most probably wouldn't have alleys except the older areas.  It's a bit of a surprise more houses don't have fences, but suburbs out here wouldn't have fences I think.  There was a period of time when houses didn't have fireplaces, but a lot of older houses and newer houses should have them.  Most houses have garages, but maybe not the older ones.
+looking now at combinations to see where they're happening
+```{r}
+library(mice)
+mice::md.pattern(train_data, rotate.names = TRUE)
+```
+
+## Relationships between input variables
+1) see that missing lot frontage is highest in cul de sac lots, but not exclusively
+```{r}
+table(train_data$LotConfig, is.na(train_data$LotFrontage))
+```
+Also see HouseStyle and GrLivArea (above grade living area) seem to correlate though maybe it's only enough to say 1 story and two story are different based on square footage it seems
+```{r}
+library(ggplot2)
+ggplot(train_data, aes(x=HouseStyle, y=GrLivArea)) + geom_boxplot()
+```
+
+House style and whether there is a fireplace appear to correlate
+```{r}
+table(train_data$HouseStyle, is.na(train_data$FireplaceQu))
+```
+begin looking at correlations
+```{r}
+library(dplyr)
+library(corrplot)
+library (corrr)
+train_data_num = train_data %>% select_if(., is.numeric)
+numcor = cor(train_data_num)
+numcor
+write.csv(numcor,'numcor.csv')
+```
+
