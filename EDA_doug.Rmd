@@ -19,16 +19,11 @@ str(train_data)
 summary(train_data)
 ```
 
-See some parameters that clearly aren't what they're labeled.  
-convert MSSubClass to character/factor
-```{r}
-train_data$MSSubClass = as.character(train_data$MSSubClass)
-```
-
 ## look for NAs
 Not much missing data except for: ~40% fireplaces, ~2.5% basements, 94% alleys, 80% fences, ~2% lot frontage, ~5% garages and 99.5% pools.
 ```{r}
-colSums(is.na.data.frame(train_data))
+a = colSums(is.na.data.frame(train_data))
+a[a>0]
 ```
 Most houses in Ames wouldn't have pools, and most probably wouldn't have alleys except the older areas.  It's a bit of a surprise more houses don't have fences, but suburbs out here wouldn't have fences I think.  There was a period of time when houses didn't have fireplaces, but a lot of older houses and newer houses should have them.  Most houses have garages, but maybe not the older ones.
 looking now at combinations to see where they're happening
@@ -55,11 +50,219 @@ table(train_data$HouseStyle, is.na(train_data$FireplaceQu))
 begin looking at correlations
 ```{r}
 library(dplyr)
+```
+time series of yr sold
+```{r}
+train_data %>% group_by(., YrSold) %>% summarise(., mean(SalePrice))
+```
+ ## start changing column types and count number of NAs
+```{r}
+train_data$MSSubClass = as.character(train_data$MSSubClass)
+train_data$LotShape = ifelse(train_data$LotShape=='Reg',1,
+                      ifelse(train_data$LotShape=='IR1',2,
+                      ifelse(train_data$LotShape=='IR2',3,4)))
+a = colSums(is.na.data.frame(train_data))
+a[a>0]
+```
+continue changing what I think are ordinal strings to numbers so we can judge correlation against other parameters
+```{r}
+train_data$Utilities = ifelse(train_data$Utilities=='AllPub',1,
+                      ifelse(train_data$Utilities=='NoSewr',2,
+                      ifelse(train_data$Utilities=='NoSeWa',3,4)))
+train_data$LandSlope = ifelse(train_data$LandSlope=='Gtl',1,
+                      ifelse(train_data$LandSlope=='Mod',2,3))
+train_data$ExterQual = ifelse(train_data$ExterQual=='Ex',1,
+                      ifelse(train_data$ExterQual=='Gd',2,
+                      ifelse(train_data$ExterQual=='TA',3,
+                      ifelse(train_data$ExterQual=='Fa',4,5))))
+train_data$ExterCond = ifelse(train_data$ExterCond=='Ex',1,
+                      ifelse(train_data$ExterCond=='Gd',2,
+                      ifelse(train_data$ExterCond=='TA',3,
+                      ifelse(train_data$ExterCond=='Fa',4,5))))
+train_data$BsmtQual = ifelse(is.na(train_data$BsmtQual),6,
+                      ifelse(train_data$BsmtQual=='Ex',1,
+                      ifelse(train_data$BsmtQual=='Gd',2,
+                      ifelse(train_data$BsmtQual=='TA',3,
+                      ifelse(train_data$BsmtQual=='Fa',4,5)))))
+train_data$BsmtCond = ifelse(is.na(train_data$BsmtCond),6,
+                      ifelse(train_data$BsmtCond=='Ex',1,
+                      ifelse(train_data$BsmtCond=='Gd',2,
+                      ifelse(train_data$BsmtCond=='TA',3,
+                      ifelse(train_data$BsmtCond=='Fa',4,5)))))
+train_data$BsmtExposure = ifelse(is.na(train_data$BsmtExposure),5,
+                      ifelse(train_data$BsmtExposure=='Gd',1,
+                      ifelse(train_data$BsmtExposure=='Av',2,
+                      ifelse(train_data$BsmtExposure=='Mn',3,4))))
+train_data$BsmtFinType1 = ifelse(is.na(train_data$BsmtFinType1),7,
+                      ifelse(train_data$BsmtFinType1=='GLQ',1,
+                      ifelse(train_data$BsmtFinType2=='ALQ',2,
+                      ifelse(train_data$BsmtFinType1=='BLQ',3,
+                      ifelse(train_data$BsmtFinType1=='Rec',4,
+                      ifelse(train_data$BsmtFinType1=='LwQ',5,6))))))
+train_data$HeatingQC = ifelse(train_data$HeatingQC=='Ex',1,
+                      ifelse(train_data$HeatingQC=='Gd',2,
+                      ifelse(train_data$HeatingQC=='TA',3,
+                      ifelse(train_data$HeatingQC=='Fa',4,5))))
+train_data$Electrical = ifelse(is.na(train_data$Electrical),3,
+                      ifelse(train_data$Electrical=='SBrkr',1,
+                      ifelse(train_data$Electrical=='FuseA',2,
+                      ifelse(train_data$Electrical=='FuseF',3,
+                      ifelse(train_data$Electrical=='FuseP',4,3)))))
+train_data$KitchenQual = ifelse(train_data$KitchenQual=='Ex',1,
+                      ifelse(train_data$KitchenQual=='Gd',2,
+                      ifelse(train_data$KitchenQual=='TA',3,
+                      ifelse(train_data$KitchenQual=='Fa',4,5))))
+train_data$Functional = ifelse(train_data$Functional=='Typ',1,
+                      ifelse(train_data$Functional=='Min1',2,
+                      ifelse(train_data$Functional=='Min2',3,
+                      ifelse(train_data$Functional=='Mod',4,
+                      ifelse(train_data$Functional=='Maj1',5,
+                      ifelse(train_data$Functional=='Maj2',6,
+                      ifelse(train_data$Functional=='Sev',7,8)))))))
+train_data$FireplaceQu = ifelse(is.na(train_data$FireplaceQu),6,
+                      ifelse(train_data$FireplaceQu=='Ex',1,
+                      ifelse(train_data$FireplaceQu=='Gd',2,
+                      ifelse(train_data$FireplaceQu=='TA',3,
+                      ifelse(train_data$FireplaceQu=='Fa',4,5)))))
+train_data$GarageFinish = ifelse(is.na(train_data$GarageFinish),4,
+                      ifelse(train_data$GarageFinish=='Fin',1,
+                      ifelse(train_data$GarageFinish=='RFn',2,3)))
+train_data$GarageQual = ifelse(is.na(train_data$GarageQual),6,ifelse(train_data$GarageQual=='Ex',1,
+                      ifelse(train_data$GarageQual=='Gd',2,
+                      ifelse(train_data$GarageQual=='TA',3,
+                      ifelse(train_data$GarageQual=='Fa',4,5)))))
+train_data$GarageCond = ifelse(is.na(train_data$GarageCond),6,
+                      ifelse(train_data$GarageCond=='Ex',1,
+                      ifelse(train_data$GarageCond=='Gd',2,
+                      ifelse(train_data$GarageCond=='TA',3,
+                      ifelse(train_data$GarageCond=='Fa',4,5)))))
+train_data$PavedDrive = ifelse(train_data$PavedDrive=='Y',1,
+                      ifelse(train_data$PavedDrive=='P',2,3))
+train_data$PoolQC = ifelse(is.na(train_data$PoolQC),5,ifelse(train_data$PoolQC=='Ex',1,
+                      ifelse(train_data$PoolQC=='Gd',2,
+                      ifelse(train_data$PoolQC=='TA',3,4))))
+train_data$Fence = ifelse(is.na(train_data$Fence),5,
+                      ifelse(train_data$Fence=='GdPrv',1,
+                      ifelse(train_data$Fence=='MnPrv',2,
+                      ifelse(train_data$Fence=='GdWo',3,4))))
+```
+check structure of dataframe after change to nominal
+```{r}
+a = colSums(is.na.data.frame(train_data))
+a[a>0]
+```
+make sure number of numeric columns is higher
+```{r}
+str(train_data)
+```
+
+now recalculate the correlation matrix
+```{r}
 library(corrplot)
 library (corrr)
 train_data_num = train_data %>% select_if(., is.numeric)
 numcor = cor(train_data_num)
-numcor
 write.csv(numcor,'numcor.csv')
 ```
+
+```{r}
+i = 1
+j = 1
+for (i in 1:dim(numcor)[1]){
+  for (j in 1:dim(numcor)[1]){
+    if (is.na(numcor[i,j])){}
+    else if(abs(numcor[i,j])>0.7 & abs(numcor[i,j])<0.999) {print(paste(
+      rownames(numcor)[i],
+      colnames(numcor)[j],
+      numcor[i,j]
+    ))}
+  }
+}
+```
+see if we can find correlations between categoricals and numerics with anova
+
+```{r}
+train_data2 = train_data %>% select(., -c(Alley, MiscFeature))
+train_data2 = train_data2 %>% select(., -c(LotFrontage, BsmtFinType2,GarageType, GarageYrBlt, SalePrice))
+colSums(is.na(train_data2))
+train_numrc = train_data2 %>% select_if(., is.numeric)
+train_chrc = train_data2 %>% select_if(., is.character)
+# str(train_chrc)
+# str(train_numrc)
+```
+
+
+
+```{r}
+# for (i in 1:dim(train_chrc)[2]) {
+#   print(colnames(train_chrc)[i])
+#   print(table(train_chrc[,i]))
+# }
+omts = 0
+b=''
+for (i in 1:dim(train_chrc)[2]){
+  if(sum(is.na(train_chrc[,i]))>omts | min(table(train_chrc[,i]))<2){
+    b = c(b,(paste(i,j,'fail for na in category or too few in one category')))
+  }
+  else {
+      for (j in 2:dim(train_numrc)[2]){
+        if(sum(is.na(train_numrc[i,j]))>omts){
+          b = c(b,(paste(i,j,'fail for na in numeric')))
+        }
+        else{
+          a = oneway.test(train_numrc[ ,j]~train_chrc[ ,i], na.action = na.omit)
+          if (is.na(a$p.value)) {}
+          else if (a$p.value<0.01) {
+            b = c(b,(paste(i,j,a$p.value,colnames(train_numrc)[j],colnames(train_chrc)[i])))
+        }
+        }
+      }
+  }
+}
+```
+write p values to file
+```{r}
+write.csv(b,'anovas.csv')
+```
+
+pull out columns that correlated to other columns
+```{r}
+train_data3 = train_data %>% select(., -c('Id','ExterQual','TotalBsmtSF','TotRmsAbvGrd', 'FireplaceQu','GarageArea','GarageCond','PoolArea','MSZoning','BldgType','HouseStyle','CentralAir','MiscFeature','Alley','LotFrontage','GarageType','GarageYrBlt'))
+train_data3
+```
+fit a model
+```{r}
+# colSums(is.na(train_data3))[colSums(is.na(train_data3))>0]
+train_data3 = train_data3[complete.cases(train_data3),]
+colSums(is.na(train_data3))[colSums(is.na(train_data3))>0]
+```
+
+```{r}
+housemodel = glm(SalePrice~.,data = train_data3)
+summary(housemodel)
+plot(housemodel)
+```
+
+```{r}
+housemodel
+```
+
+```{r}
+housemodel$coefficients[housemodel$coefficients>500000]
+plot(housemodel$coefficients)
+```
+
+
+```{r}
+library(car)
+vif(housemodel)
+```
+
+
+
+
+
+
+
+
 
