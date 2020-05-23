@@ -96,7 +96,7 @@ def ordinal_ranker(housedf):
     housedf.loc[housedf['OverallQual'].isnull(), 'OverallQual'] = \
             housedf.OverallQual.dropna().sample(housedf['OverallQual'].\
             isnull().sum()).values
- # Overall condition, 10 is best/highest, need to fill in any NAs
+ # Overall condition, 10 is best/highest, random impute to fill in any NAs
   # reuse overll_map_dict
     housedf['OverallCond'] = housedf['OverallCond'].replace(overll_map_dict)
     housedf.loc[housedf['OverallCond'].isnull(), 'OverallCond'] = \
@@ -107,7 +107,20 @@ def ordinal_ranker(housedf):
     housedf['LotShape'] = housedf['LotShape'].str.lower()
     housedf['LotShape'] = housedf['LotShape'].replace(lot_shp_map_dict)
     housedf['LotShape'] = housedf['LotShape'].fillna(16)  
-      
+ # KitchenQual, assume Ex is highest/best, fill in NAs with random impute
+    # reuse basement quality map, same scale
+    housedf['KitchenQual'] = housedf['KitchenQual'].str.lower()
+    housedf['KitchenQual'] = housedf['KitchenQual'].replace(bsmt_qual_map_dict)
+    housedf.loc[housedf['KitchenQual'].isnull(), 'KitchenQual'] = \
+            housedf.KitchenQual.dropna().sample(housedf['KitchenQual'].\
+            isnull().sum()).values
+ # Functional, assume typ is highest/best, fill in NAs with random inpute
+    fdxl_map_dict = {'typ': 64,'min1': 49,'min2': 36,'mod':25,'maj1':16,'maj2':9,'sev':4,'sal':1}
+    housedf['Functional'] = housedf['Functional'].str.lower()
+    housedf['Functional'] = housedf['Functional'].replace(fdxl_map_dict) 
+    housedf.loc[housedf['Functional'].isnull(), 'Functional'] = \
+            housedf.Functional.dropna().sample(housedf['Functional'].\
+            isnull().sum()).values
     return housedf
 
 

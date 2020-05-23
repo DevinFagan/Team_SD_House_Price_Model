@@ -32,6 +32,9 @@ def fillna(data):
     
     # BsmtUnfSF - fill NA with 0
     data.BsmtUnfSF = data.BsmtUnfSF.fillna(0)
+
+    # TotalBsmtSF - fill NA with 0
+    data.TotalBsmtSF = data.TotalBsmtSF.fillna(0)
     
     # BsmtFullBath - fill NA with 0
     data.BsmtFullBath = data.BsmtFullBath.fillna(0)
@@ -44,6 +47,9 @@ def fillna(data):
     
     # GarageArea -  fill NA with median
     data.GarageArea = data.GarageArea.fillna(data.GarageArea.median())
+
+    # GarageCars -  fill NA with median
+    data.GarageCars = data.GarageCars.fillna(data.GarageCars.median())
     
     #GarageYear - fill na with median of years
     data.GarageYrBlt = data.GarageYrBlt.fillna(data.GarageYrBlt.median())
@@ -53,7 +59,7 @@ def fillna(data):
     
     # SaleType -  fill NA with random impute?
     data.loc[data['SaleType'].isnull(), 'SaleType'] = data.LotFrontage.dropna().sample(data['SaleType'].isnull().sum()).values
-    
+
     return data, data.loc[:, data.isnull().any()] # check if NA exists
 
 # train_raw,train_raw_nas = fillna(train_raw)
