@@ -202,18 +202,18 @@ omts = 0
 b=''
 for (i in 1:dim(train_chrc)[2]){
   if(sum(is.na(train_chrc[,i]))>omts | min(table(train_chrc[,i]))<2){
-    b = c(b,(paste(i,j,'fail for na in category or too few in one category')))
+    b = c(b,(paste(i,j,'fail for na in category or too few in one category',sep = ',')))
   }
   else {
       for (j in 2:dim(train_numrc)[2]){
         if(sum(is.na(train_numrc[i,j]))>omts){
-          b = c(b,(paste(i,j,'fail for na in numeric')))
+          b = c(b,(paste(i,j,'fail for na in numeric',sep = ',')))
         }
         else{
           a = oneway.test(train_numrc[ ,j]~train_chrc[ ,i], na.action = na.omit)
           if (is.na(a$p.value)) {}
           else if (a$p.value<0.01) {
-            b = c(b,(paste(i,j,a$p.value,colnames(train_numrc)[j],colnames(train_chrc)[i])))
+            b = c(b,(paste(i,j,a$p.value,colnames(train_numrc)[j],colnames(train_chrc)[i],sep = ',')))
         }
         }
       }
