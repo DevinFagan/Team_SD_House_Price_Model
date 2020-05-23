@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 
-train_raw = pd.read_csv("train.csv",index_col="Id")
-test_raw  = pd.read_csv("test.csv",index_col="Id")
+# train_raw = pd.read_csv("train.csv",index_col="Id")
+# test_raw  = pd.read_csv("test.csv",index_col="Id")
 
 def fillna(data):
     #Alley - Replace NA by None
@@ -10,11 +10,7 @@ def fillna(data):
     
     #MSZoning - fill NA with random impute
     data.loc[data['MSZoning'].isnull(), 'MSZoning'] = data.LotFrontage.dropna().sample(data['MSZoning'].isnull().sum()).values
-    
-    #Fence - Make a new column with transfer,MnWw and MnPrv to MnPrv/MnWw, GdWo and GdPrv to GdPrv/GdWo, fill na with None
-    data['Fence_new'] = data.Fence
-    data.Fence_new = data.Fence_new.replace({'MnWw': 'MnPrv/MnWw','MnPrv':'MnPrv/MnWw','GdWo':'GdPrv/GdWo','GdWo':'GdPrv/GdWo'}).fillna('None') 
-    
+        
     #Exterior1st - fill NA with random impute
     data.loc[data['Exterior1st'].isnull(), 'Exterior1st'] = data.LotFrontage.dropna().sample(data['Exterior1st'].isnull().sum()).values
     
@@ -60,5 +56,5 @@ def fillna(data):
     
     return data, data.loc[:, data.isnull().any()] # check if NA exists
 
-train_raw,train_raw_nas = fillna(train_raw)
-test_raw, test_raw_nas= fillna(test_raw)
+# train_raw,train_raw_nas = fillna(train_raw)
+# test_raw, test_raw_nas= fillna(test_raw)
