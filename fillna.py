@@ -62,5 +62,10 @@ def fillna(data):
 
     return data, data.loc[:, data.isnull().any()] # check if NA exists
 
-# train_raw,train_raw_nas = fillna(train_raw)
-# test_raw, test_raw_nas= fillna(test_raw)
+def dummy_conv(data):
+    '''
+    converts all categoricals to dummies
+    input is dataframe
+    output is non-mutating, need to set equal to function call
+    '''
+    return pd.get_dummies(data,drop_first=True)
