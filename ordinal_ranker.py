@@ -123,5 +123,14 @@ def ordinal_ranker(housedf):
             isnull().sum()).values
     return housedf
 
-
+def feature_select(housedf):
+	# rename features with names that begin with number.  OLS anova had trouble
+	housedf.rename(columns = {'1stFlrSF':'FirstFlrSF','2ndFlrSF':'SecndFlrSF',\
+                              '3SsnPorch':'ThreSsnPorch'}, inplace = True)
+	# remove highly correlated variables, and some others like ID
+	housedf = housedf.drop(columns=["GarageCond","GarageCars","PoolArea","OverallQual",\
+		"Fireplaces","YearBuilt","BsmtFinType2","FirstFlrSF","TotRmsAbvGrd",\
+		"MSSubClass","BldgType","HouseStyle","GarageType","GarageYrBlt","Id",\
+        "MSSubClass"], inplace=True)
+	return housedf
 
