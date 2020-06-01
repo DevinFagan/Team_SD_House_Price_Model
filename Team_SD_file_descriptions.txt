@@ -1,0 +1,28 @@
+File descriptions:
+EDA_doug.RMD: file for initial exploratory data analysis with R
+
+fillna.py: module with fillna fxn to remove nas with random imputation, dummy_conv to do the categorical feature dummification and data_process which is the overall function to call all functions (including from ordinal_ranker module) to preprocess data
+
+ordinal_ranker.py: module with ordinal_ranker fxn to change ordinal descriptions to squared continuous variables, value_check to remove/impute mistyped variables, to ensure we have correct levels, and feature_select to remove columns decided after correlation analysis.
+
+house_train.csv: training data after cleaning/preprocessing, for storage
+
+model_coef.py: script to create dataframe of coefficients from ridge, lasso and elastic net models that were examined.
+
+numcor.csv: pearson r correlations between continous variables
+
+pearson.ipynb: notebook with function to perform pearson r correlations
+
+svr_regression_model_0530.py: script to call preprocessing functions, fit model and write out sample submission file.  Calls ordinal_ranker, fillna modules with preprocessing functions inside.
+
+test.csv, train.csv: train is sample data from Kaggle, test are points to be predicted for Kaggle.
+
+team_SD_submission_svr.csv: sample submission file for Kaggle
+
+svr_notebook_052920_v2.ipynb: notebook with cross-validations of SVR model, and visualizations of residuals and model predictions.
+
+rf_gbr_model.py: random forest and gradient boost regression model scripts
+
+penalized_regression_models.ipyb and .py: notebook and scripts of penalized (elastic net, lasso and ridge) regression models.
+
+house_price_present.pptx: presentation for team project
