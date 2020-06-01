@@ -70,4 +70,8 @@ test_y_predict = np.exp(svr.predict(x_sub_scaled))
 with open('coefs_dict.csv', 'w') as f:
     for key in coefs_dict.keys():
         f.write("%s,%f8,%f10\n"%(key,coefs_dict[key][0],coefs_dict[key][1]))
-np.savetxt('teamSD_submission_svr.csv', (range(1461,2920),test_y_predict), delimiter=',', header = 'ID, SalePrice')
+
+team_SD_submission1=pd.DataFrame(range(1461,2920))
+team_SD_submission1.columns = ['Id']
+team_SD_submission1['SalePrice']=test_y_predict
+team_SD_submission1.to_csv('teamSD_submission_svr.csv')
