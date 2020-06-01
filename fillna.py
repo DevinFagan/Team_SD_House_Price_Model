@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
+import random
+from ordinal_ranker import *
 
+random.seed(8)
 # train_raw = pd.read_csv("train.csv",index_col="Id")
 # test_raw  = pd.read_csv("test.csv",index_col="Id")
 
@@ -69,3 +72,11 @@ def dummy_conv(data):
     output is non-mutating, need to set equal to function call
     '''
     return pd.get_dummies(data,drop_first=True)
+
+def data_process(data):
+    fillna(data)
+    value_check(data)
+    ordinal_ranker(data)
+    feature_select(data)
+    data = dummy_conv(data)
+    return data
